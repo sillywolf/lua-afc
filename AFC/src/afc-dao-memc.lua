@@ -25,7 +25,7 @@ function MemcDAO:new(args)
     end
     self.host = host;
     self.port = port;
-    
+
     local memcached = require "resty.memcached"
     local memc, err= memcached:new()
     if not memc then
@@ -39,60 +39,60 @@ end
 
 function MemcDAO:setTimeout(timeout)
     if self.memc then
-            print("MemcDAO setTimeout:"..timeout);
-            self.memc:set_timeout(1000);
+        print("MemcDAO setTimeout:"..timeout);
+        self.memc:set_timeout(1000);
         return true;
-        end
-        print("MemcDAO memc is nil");
-        return false,"memc is nil";
+    end
+    print("MemcDAO memc is nil");
+    return false,"memc is nil";
 end
 
 function MemcDAO:connect()
     if self.memc then
-            print("MemcDAO connect...");
-            local ok, err = self.memc:connect(self.host, self.port);
-            if not ok then
-                err = "Failed to connect memc: "..err;
-                return false,err;
-            end
-            print("MemcDAO connected..."..self.host..":"..self.port.." OK");
-        return true;
+        print("MemcDAO connect...");
+        local ok, err = self.memc:connect(self.host, self.port);
+        if not ok then
+            err = "Failed to connect memc: "..err;
+            return false,err;
         end
-        print("MemcDAO memc is nil");
-        return false,"memc is nil";
+        print("MemcDAO connected..."..self.host..":"..self.port.." OK");
+        return true;
+    end
+    print("MemcDAO memc is nil");
+    return false,"memc is nil";
 end
 
 function MemcDAO:get(key)
     if self.memc then
-            print("MemcDAO get:"..key);
-            local res, flags, err = self.memc:get(key);
+        print("MemcDAO get:"..key);
+        local res, flags, err = self.memc:get(key);
         if err then
             err = "Failed to get "..key.." : "..err;
             return nil,err;
         end
         if not res then
-                print("MemcDAO get key:"..key..",value is nil");
-        else 
+            print("MemcDAO get key:"..key..",value is nil");
+        else
             print("MemcDAO get key:"..key..",value:"..res);
-            end
-            return res;
         end
-        print("MemcDAO memc is nil");
-        return false,"memc is nil";
+        return res;
+    end
+    print("MemcDAO memc is nil");
+    return false,"memc is nil";
 end
 
 function MemcDAO:store(self,cmd, key, value, exptime, flags)
     if not exptime then
-        exptime = 0;    
-    end    
+        exptime = 0;
+    end
     if not flags then
         flags = 0;
     end
     if self.memc then
-            print("MemcDAO store: {cmd="..cmd.."&key="..key.."&value="..value.."&exptime="..exptime.."&flags="..flags.."}");
-            local ok, err;
-            if cmd == "set" then
-            ok, err = self.memc:set(key, value, exptime, flags); 
+        print("MemcDAO store: {cmd="..cmd.."&key="..key.."&value="..value.."&exptime="..exptime.."&flags="..flags.."}");
+        local ok, err;
+        if cmd == "set" then
+            ok, err = self.memc:set(key, value, exptime, flags);
         elseif cmd == "add" then
             ok, err = self.memc:add(key, value, exptime, flags);
         elseif cmd == "replace" then
@@ -105,13 +105,13 @@ function MemcDAO:store(self,cmd, key, value, exptime, flags)
             print("MemcDAO store unknown cmd :"..cmd);
             ok, err = nil, "store cmd is unknown";
         end
-            if not ok then
-               err = "Failed to store cmd:"..cmd.." "..err
-            end
+        if not ok then
+            err = "Failed to store cmd:"..cmd.." "..err
+        end
         print("MemcDAO store: {cmd="..cmd.."&key="..key.."&value="..value.."&exptime="..exptime.."&flags="..flags.."} OK");
-            return true;
-        end 
-        print("MemcDAO memc is nil");
+        return true;
+    end
+    print("MemcDAO memc is nil");
     return false,"memc is nil";
 end
 
@@ -134,30 +134,39 @@ end
 
 function MemcDAO:delete(key)
     if self.memc then
-            print("MemcDAO delete:"..key);
-            local ok, err = self.memc:delete(key);
+        print("MemcDAO delete:"..key);
+        local ok, err = self.memc:delete(key);
         if not ok then
-               err = "Failed to delete key:"..key.." "..err
-               return false,err;
-            end
-        print("MemcDAO delete key:"..key.." OK");
-            return true;
+            err = "Failed to delete key:"..key.." "..err
+            return false,err;
         end
-        print("MemcDAO memc is nil");
-        return false,"memc is nil";
+        print("MemcDAO delete key:"..key.." OK");
+        return true;
+    end
+    print("MemcDAO memc is nil");
+    return false,"memc is nil";
 end
 
 function MemcDAO:close()
     if self.memc then
-            print("MemcDAO close...");
-            local ok, err = self.memc:close();
+        --[[
+        print("MemcDAO close...");
+        local ok, err = self.memc:close();
         if not ok then
-               err = "Failed to close: "..err
-               return false,err;
-            end
-        print("MemcDAO closed OK");
-            return true;
+        err = "Failed to close: "..err
+        return false,err;
         end
-        print("MemcDAO memc is nil");
+        print("MemcDAO closed OK");
         return true;
+        ]]
+        -- put it into the connection pool of size 100,
+        -- with 65ms idle timeout
+        local ok, err = memc:set_keepalive(65, 100)
+        if not ok then
+            ngx.say("cannot set keepalive: ", err)
+            return false,err;
+        end
+    end
+    print("MemcDAO memc is nil");
+    return true;
 end
