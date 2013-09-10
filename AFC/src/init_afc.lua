@@ -6,10 +6,16 @@
 
 --参数定义
 --PREFIX = "D:\\projects\\lua-projects\\afc-for-portal";
-PREFIX = "/lcims/work/renyb/tengine"
+local PREFIX = "/lcims/work/renyb/tengine"
 --PREFIX = ".";
-RULE_PREFIX = PREFIX..'/'.."rules";
-LOG_PREFIX = PREFIX..'/'.."logs";
+local RULE_PREFIX = PREFIX..'/'.."rules";
+local LOG_PREFIX = PREFIX..'/'.."logs";
+
+local verifyLoginUri="/loginverify.jsp";
+
+local print=print;
+local io=io;
+local insert =table.insert;
 
 --函数定义
 --获取静态规则，来自配置文件
@@ -18,7 +24,7 @@ function getStaticRules(ruleName)
     local rules = {};
     for line in file:lines() 
     do
-        table.insert(rules,line);
+        insert(rules,line);
     end
     file:close();
     return (table.concat(rules,"|"));
@@ -79,13 +85,14 @@ function serviceDeny()
     --ngx.header["Set-Cookie"] = "access=deny";
     --ngx.exit(500);
     ngx.say("<h1>WARN!!! YOUR REQ IS DENY!!!</h1>");
-    ngx.exit(ngx.HTTP_OK);
+    ngx.exit(200);
 end
 
+
 --重定向用户请求至带验证码的首页
-function redirectToVerifyPortal(destUri)
+function redirectToVerifyPortal(requestArgs)
     ngx.header.content_type="text/html";
-    return ngx.redirect(destUri);
+    return ngx.redirect(verifyLoginUri..'?'..requestArgs);
 end
 
 function getCurrPath()

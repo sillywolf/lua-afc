@@ -6,7 +6,7 @@ local uri = ngx.unescape_uri(ngx.var.request_uri);
 local username = getRequestParam("username");
 local requestArgs = ngx.var.args;
 local normalLoginUri="/login.jsp";
-local verifyLoginUri="/loginverify.jsp";
+
 
 if cookie == nil then
     --print("cookie is nil");
@@ -49,5 +49,5 @@ end
 --是，则重定向用户至带验证码的登录页面
 if uri == normalLoginUri and not validDynamicRule("username:"..username) then
     print("redirect user loging");
-    redirectToVerifyPortal(verifyLoginUri..'?'..requestArgs);
+    redirectToVerifyPortal(requestArgs);
 end
