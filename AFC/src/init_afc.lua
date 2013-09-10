@@ -79,9 +79,14 @@ function serviceDeny()
     --ngx.header["Set-Cookie"] = "access=deny";
     --ngx.exit(500);
     ngx.say("<h1>WARN!!! YOUR REQ IS DENY!!!</h1>");
-    ngx.exit(200);
+    ngx.exit(ngx.HTTP_OK);
 end
 
+--重定向用户请求至带验证码的首页
+function redirectToVerifyPortal(destUri)
+    ngx.header.content_type="text/html";
+    return ngx.redirect(destUri);
+end
 
 function getCurrPath()
     local lfs = require "lfs";

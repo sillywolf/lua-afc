@@ -4,6 +4,9 @@ local cookie = ngx.req.get_headers()["Cookie"];
 local accessip = ngx.var.remote_addr;
 local uri = ngx.unescape_uri(ngx.var.request_uri);
 local username = getRequestParam("username");
+local requestArgs = ngx.var.args;
+local normalLoginUri="/login.jsp";
+local verifyLoginUri="/loginverify.jsp";
 
 if cookie == nil then
     --print("cookie is nil");
@@ -36,7 +39,15 @@ if not validDynamicRule("accessip:"..accessip) then
     serviceDeny();
 end
 
+
 if uri == "/" and not validDynamicRule("loginip:"..accessip) then
     print("loginip deny");
     serviceDeny();
+end
+
+--校验用户是否属于多次认证失败的用户
+--是，则重定向用户至带验证码的登录页面
+if uri == normalLoginUri and not validDynamicRule("username:"..username) then
+    print("redirect user loging");
+    redirectToVerifyPortal(verifyLoginUri..'?'..requestArgs);
 end
