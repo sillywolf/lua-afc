@@ -9,7 +9,6 @@ local LOG_PREFIX = PREFIX..'/'.."logs";
 
 local verifyLoginUri="/style/default/index.jsp";
 
-local io=io;
 local insert =table.insert;
 local ngx=ngx;
 local capture=ngx.location.capture;
