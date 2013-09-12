@@ -77,7 +77,7 @@ end
 --重定向用户请求至带验证码的首页
 function redirectToVerifyPortal(requestArgs)
     ngx.header.content_type = "text/html";
-    ngx.say(capture(verifyLoginUri..'?'..requestArgs).body);
+    ngx.say(capture(verifyLoginUri,{args=requestArgs}).body);
     ngx.exit(HTTP_OK);
 end
 

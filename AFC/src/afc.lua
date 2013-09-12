@@ -7,10 +7,8 @@ local accessip = ngx.var.remote_addr;
 local unescape_uri=ngx.unescape_uri;
 local uri = unescape_uri(ngx.var.request_uri);
 
-
 local username = getRequestParam("username");
-local requestArgs = ngx.var.args;
-
+local uriArgs=ngx.req.get_uri_args();
 
 if cookie == nil then
     cookie = "";
@@ -37,6 +35,6 @@ if not validDynamicRule("accessip:"..accessip) then
 end
 
 
-if uri == "/" and not validDynamicRule("loginip:"..accessip) then
-    redirectToVerifyPortal(requestArgs);
+if  not validDynamicRule("loginip:"..accessip) then
+    redirectToVerifyPortal(uriArgs);
 end
