@@ -1,7 +1,3 @@
---require "afc_dao";
---require "afc_dao_memc";
-
-
 --流量清洗初始化脚本
 
 --参数定义
@@ -13,7 +9,6 @@ local LOG_PREFIX = PREFIX..'/'.."logs";
 
 local verifyLoginUri="/style/default/index.jsp";
 
-local print=print;
 local io=io;
 local insert =table.insert;
 local ngx=ngx;
@@ -36,13 +31,10 @@ end
 function getSharedStaticRules(ruleName)
     local sharedRules = ngx.shared.rules;
     if not (sharedRules == nil) then
-        print("use shared rules");
         local rules = sharedRules:get(ruleName);
         if rules == nil then
-            print("shared "..ruleName.." is nil, need to load from file");
             rules = getStaticRules(ruleName);
             sharedRules:set(ruleName,rules);
-            print("get "..ruleName.." from file and set to shared");
         end
         return rules;
     else
@@ -52,14 +44,6 @@ end
 --获取动态规则，来自内存库
 function getDynamicRule(ruleName)
     local rule = capture("/memc_rules?cmd=get&key="..ruleName).body;
-    --[[
-    --纯lua方式读取dao，已支持memc，可以扩展支持其他内存库
-    local dao = MemcDAO:new({host="192.168.97.143",port=11211});
-    dao:setTimeout(1000);
-    dao:connect();
-    local rule = dao:get(ruleName);
-    dao:close();
-    --]]
     return rule;
 end
 
@@ -72,6 +56,7 @@ function validStaticRules(attr,ruleName)
         return true;
     end
 end
+
 --验证动态规则
 function validDynamicRule(attr)
     local result = getDynamicRule(attr);
@@ -81,11 +66,10 @@ function validDynamicRule(attr)
         return true;
     end
 end
+
 --拒绝服务
 function serviceDeny()
     ngx.header.content_type = "text/html";
-    --ngx.header["Set-Cookie"] = "access=deny";
-    --ngx.exit(500);
     ngx.say("<h1>WARN!!! YOUR REQ IS DENY!!!</h1>");
     ngx.exit(HTTP_OK);
 end
