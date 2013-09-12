@@ -1,6 +1,6 @@
 --require "afc_dao";
 --require "afc_dao_memc";
-    
+
 
 --流量清洗初始化脚本
 
@@ -11,18 +11,21 @@ local PREFIX = "/lcims/work/renyb/tengine"
 local RULE_PREFIX = PREFIX..'/'.."rules";
 local LOG_PREFIX = PREFIX..'/'.."logs";
 
-local verifyLoginUri="/loginverify.jsp";
+local verifyLoginUri="/style/default/index.jsp";
 
 local print=print;
 local io=io;
 local insert =table.insert;
+local ngx=ngx;
+local capture=ngx.location.capture;
+local HTTP_OK=ngx.HTTP_OK;
 
 --函数定义
 --获取静态规则，来自配置文件
 function getStaticRules(ruleName)
     local file = io.open(RULE_PREFIX..'/'..ruleName,"r");
     local rules = {};
-    for line in file:lines() 
+    for line in file:lines()
     do
         insert(rules,line);
     end
@@ -30,7 +33,7 @@ function getStaticRules(ruleName)
     return (table.concat(rules,"|"));
 end
 --从共享内存读取rules，提升效率
-function getSharedStaticRules(ruleName) 
+function getSharedStaticRules(ruleName)
     local sharedRules = ngx.shared.rules;
     if not (sharedRules == nil) then
         print("use shared rules");
@@ -48,7 +51,7 @@ function getSharedStaticRules(ruleName)
 end
 --获取动态规则，来自内存库
 function getDynamicRule(ruleName)
-    local rule = ngx.location.capture("/memc_rules?cmd=get&key="..ruleName).body;
+    local rule = capture("/memc_rules?cmd=get&key="..ruleName).body;
     --[[
     --纯lua方式读取dao，已支持memc，可以扩展支持其他内存库
     local dao = MemcDAO:new({host="192.168.97.143",port=11211});
@@ -76,23 +79,23 @@ function validDynamicRule(attr)
         return false;
     else
         return true;
-    end 
+    end
 end
-
 --拒绝服务
 function serviceDeny()
     ngx.header.content_type = "text/html";
     --ngx.header["Set-Cookie"] = "access=deny";
     --ngx.exit(500);
     ngx.say("<h1>WARN!!! YOUR REQ IS DENY!!!</h1>");
-    ngx.exit(200);
+    ngx.exit(HTTP_OK);
 end
 
 
 --重定向用户请求至带验证码的首页
 function redirectToVerifyPortal(requestArgs)
-    ngx.header.content_type="text/html";
-    return ngx.redirect(verifyLoginUri..'?'..requestArgs);
+    ngx.header.content_type = "text/html";
+    ngx.say(capture(verifyLoginUri..'?'..requestArgs).body);
+    ngx.exit(HTTP_OK);
 end
 
 function getCurrPath()
