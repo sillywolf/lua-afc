@@ -1,9 +1,7 @@
 --流量清洗初始化脚本
 
 --参数定义
---PREFIX = "D:\\projects\\lua-projects\\afc-for-portal";
 local PREFIX = "/lcims/work/renyb/tengine"
---PREFIX = ".";
 local RULE_PREFIX = PREFIX..'/'.."rules";
 local LOG_PREFIX = PREFIX..'/'.."logs";
 
@@ -77,13 +75,8 @@ end
 --重定向用户请求至带验证码的首页
 function redirectToVerifyPortal(requestArgs)
     ngx.header.content_type = "text/html";
-    ngx.say(capture(verifyLoginUri,{args=requestArgs}).body);
+    ngx.say(capture(verifyLoginUri).body);
     ngx.exit(HTTP_OK);
-end
-
-function getCurrPath()
-    local lfs = require "lfs";
-    return (lfs.currentdir());
 end
 
 function getRequestParam(paramName)
