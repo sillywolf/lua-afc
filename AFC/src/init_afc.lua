@@ -1,19 +1,19 @@
---Á÷Á¿ÇåÏ´³õÊ¼»¯½Å±¾
+--æµé‡æ¸…æ´—åˆå§‹åŒ–è„šæœ¬
 
---²ÎÊı¶¨Òå
+--å‚æ•°å®šä¹‰
 local PREFIX = "/lcims/work/renyb/tengine"
 local RULE_PREFIX = PREFIX..'/'.."rules";
 local LOG_PREFIX = PREFIX..'/'.."logs";
 
-local verifyLoginUri="/style/default/index.jsp";
+local verifyLoginUri="/index.html";
 
 local insert =table.insert;
 local ngx=ngx;
 local capture=ngx.location.capture;
 local HTTP_OK=ngx.HTTP_OK;
 
---º¯Êı¶¨Òå
---»ñÈ¡¾²Ì¬¹æÔò£¬À´×ÔÅäÖÃÎÄ¼ş
+--å‡½æ•°å®šä¹‰
+--è·å–é™æ€è§„åˆ™ï¼Œæ¥è‡ªé…ç½®æ–‡ä»¶
 function getStaticRules(ruleName)
     local file = io.open(RULE_PREFIX..'/'..ruleName,"r");
     local rules = {};
@@ -24,7 +24,7 @@ function getStaticRules(ruleName)
     file:close();
     return (table.concat(rules,"|"));
 end
---´Ó¹²ÏíÄÚ´æ¶ÁÈ¡rules£¬ÌáÉıĞ§ÂÊ
+--ä»å…±äº«å†…å­˜è¯»å–rulesï¼Œæå‡æ•ˆç‡
 function getSharedStaticRules(ruleName)
     local sharedRules = ngx.shared.rules;
     if not (sharedRules == nil) then
@@ -38,13 +38,13 @@ function getSharedStaticRules(ruleName)
         return getStaticRules(ruleName);
     end
 end
---»ñÈ¡¶¯Ì¬¹æÔò£¬À´×ÔÄÚ´æ¿â
+--è·å–åŠ¨æ€è§„åˆ™ï¼Œæ¥è‡ªå†…å­˜åº“
 function getDynamicRule(ruleName)
     local rule = capture("/memc_rules?cmd=get&key="..ruleName).body;
     return rule;
 end
 
---ÑéÖ¤¾²Ì¬¹æÔò
+--éªŒè¯é™æ€è§„åˆ™
 function validStaticRules(attr,ruleName)
     local ruleReg = getStaticRules(ruleName);
     if attr and ngx.re.match(attr,ruleReg,"isjo")  then
@@ -54,7 +54,7 @@ function validStaticRules(attr,ruleName)
     end
 end
 
---ÑéÖ¤¶¯Ì¬¹æÔò
+--éªŒè¯åŠ¨æ€è§„åˆ™
 function validDynamicRule(attr)
     local result = getDynamicRule(attr);
     if result == "deny" then
@@ -64,7 +64,7 @@ function validDynamicRule(attr)
     end
 end
 
---¾Ü¾ø·şÎñ
+--æ‹’ç»æœåŠ¡
 function serviceDeny()
     ngx.header.content_type = "text/html";
     ngx.say("<h1>WARN!!! YOUR REQ IS DENY!!!</h1>");
@@ -72,11 +72,10 @@ function serviceDeny()
 end
 
 
---ÖØ¶¨ÏòÓÃ»§ÇëÇóÖÁ´øÑéÖ¤ÂëµÄÊ×Ò³
+--é‡å®šå‘ç”¨æˆ·è¯·æ±‚è‡³å¸¦éªŒè¯ç çš„é¦–é¡µ
 function redirectToVerifyPortal(requestArgs)
     ngx.header.content_type = "text/html";
-    ngx.say(capture(verifyLoginUri).body);
-    ngx.exit(HTTP_OK);
+    ngx.exec(verifyLoginUri,requestArgs);
 end
 
 function getRequestParam(paramName)

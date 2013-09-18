@@ -1,6 +1,5 @@
 local ngx=ngx;
 local req=ngx.req;
-req.read_body();
 local user_agent = ngx.var.http_user_agent;
 local cookie = req.get_headers()["Cookie"];
 local accessip = ngx.var.remote_addr;
