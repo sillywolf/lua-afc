@@ -1,14 +1,11 @@
-
 DAO = {}
 DAO.__index = DAO;
 
 function DAO:new(args)
     local self = {};
     setmetatable(self, DAO);
-    print("DAO init...");
     self.args = args;
     return self;
---return nil,"you can't new base DAO class";
 end
 
 function DAO:setTimeout(timeout)

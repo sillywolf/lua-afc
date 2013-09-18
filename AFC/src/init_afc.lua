@@ -8,7 +8,6 @@ local insert =table.insert;
 local ngx=ngx;
 local capture=ngx.location.capture;
 local HTTP_OK=ngx.HTTP_OK;
-local print=print;
 
 package.path = LUA_PREFIX.."/?.lua;"..package.path;
 require "afc_dao";
@@ -40,7 +39,6 @@ function getSharedStaticRules(ruleName)
 end
 
 function getDynamicRule(ruleName)
-    print("getDynamicRule ==>",ruleName);
     local dao = MemcDAO:new(memc);
     dao:setTimeout(10000);
     dao:connect();
@@ -50,7 +48,6 @@ function getDynamicRule(ruleName)
 end
 
 function validStaticRules(attr,ruleName)
-    print("valid static Rules ==>",ruleName);
     local ruleReg = getSharedStaticRules(ruleName);
     if attr and ngx.re.match(attr,ruleReg,"isjo")  then
         return false;
@@ -75,7 +72,6 @@ function serviceDeny()
 end
 
 function redirectToVerifyPortal(requestArgs)
-    print("===>redirectToVerifyPortal<=======");
     ngx.header.content_type = "text/html";
     ngx.exec(verifyLoginUri,requestArgs);
 end
