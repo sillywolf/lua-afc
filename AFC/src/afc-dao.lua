@@ -1,3 +1,4 @@
+
 DAO = {}
 DAO.__index = DAO;
 
@@ -7,11 +8,11 @@ function DAO:new(args)
     print("DAO init...");
     self.args = args;
     return self;
-    --return nil,"you can't new base DAO class"; 
+--return nil,"you can't new base DAO class";
 end
 
 function DAO:setTimeout(timeout)
-        print("DAO setTimeout:"..timeout);
+    print("DAO setTimeout:"..timeout);
 end
 
 function DAO:connect()
@@ -24,8 +25,8 @@ end
 
 function DAO:store(cmd, key, value, exptime, flags)
     if not exptime then
-        exptime = 0;    
-    end    
+        exptime = 0;
+    end
     if not flags then
         flags = 0;
     end
@@ -55,3 +56,4 @@ end
 function DAO:close()
     print("DAO closed");
 end
+
